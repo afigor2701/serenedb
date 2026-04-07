@@ -1,7 +1,13 @@
 name: auto | pr trigger
 
 on:
-  pull_request:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to test against'
+        required: true
+        type: number
+  pull_request_target:
     types: [opened, labeled]
   issue_comment:
     types: [edited]
@@ -13,7 +19,7 @@ concurrency:
 jobs:
   post-checkboxes:
     if: >-
-      github.event_name == 'pull_request' && (
+      github.event_name == 'pull_request_target' && (
         github.event.action == 'opened' ||
         (github.event.action == 'labeled' && github.event.label.name == 'spawn-build-bot')
       )
@@ -62,6 +68,7 @@ jobs:
       github.event_name == 'issue_comment' &&
       github.event.action == 'edited' &&
       github.event.issue.pull_request &&
+      github.event.comment.user.login == 'github-actions[bot]' &&
       contains(github.event.comment.body, '<!-- serenedb-ci-trigger -->') &&
       contains(github.event.comment.body, '- [x] **Trigger Jobs**')
     runs-on: ubuntu-latest
@@ -76,7 +83,9 @@ jobs:
         uses: actions/github-script@v8
         with:
           script: |
-            const prNumber = context.payload.issue.number;
+            const prNumber = context.eventName === 'workflow_dispatch'
+              ? parseInt(context.payload.inputs.pr_number)
+              : context.payload.issue.number;
             const { owner, repo } = context.repo;
             const [{ data: pr }, { data: mergeRef }] = await Promise.all([
               github.rest.pulls.get({ owner, repo, pull_number: prNumber }),
