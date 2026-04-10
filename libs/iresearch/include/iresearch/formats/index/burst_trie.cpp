@@ -1060,20 +1060,6 @@ class TermReaderBase : public TermReader, private util::Noncopyable {
   FreqAttr _freq;  // total term freq
 };
 
-// uint8_t TermReaderBase::WandIndex(uint8_t i) const noexcept {
-//   if (i >= kMaxScorers) {
-//     return WandContext::kDisable;
-//   }
-
-//   const uint64_t mask{uint64_t{1} << i};
-
-//   if (0 == (_wand_mask & mask)) {
-//     return WandContext::kDisable;
-//   }
-
-//   return static_cast<uint8_t>(std::popcount(_wand_mask & (mask - 1)));
-// }
-
 bool TermReaderBase::has_scorer(uint8_t index) const noexcept {
   return index == 0 && _has_wand;
 }
