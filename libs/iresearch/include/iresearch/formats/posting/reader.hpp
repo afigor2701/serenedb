@@ -469,8 +469,7 @@ DocIterator::ptr PostingsReaderImpl<FormatTraits>::WandIterator(
       auto make_postings_iterator = [&]<bool Root>(
                                       const PostingCookie& cookie) {
         auto it =
-          memory::make_managed<SingleWandIterator<FormatTraits, Root, Pos, Offs,
-                                                  HasWand, InputType>>();
+          memory::make_managed<SingleWandIterator<FormatTraits, Root, Pos, Offs, InputType>>();
         it->Prepare(cookie, _doc_in.get());
         return it;
       };
@@ -488,7 +487,7 @@ DocIterator::ptr PostingsReaderImpl<FormatTraits>::WandIterator(
       }
 
       using Iterator =
-        SingleWandIterator<FormatTraits, false, Pos, Offs, HasWand, InputType>;
+        SingleWandIterator<FormatTraits, false, Pos, Offs, InputType>;
       using Adapter = WandPostingAdapter<Iterator>;
 
       return memory::make_managed<MaxScoreIterator<Adapter>>(
@@ -521,32 +520,21 @@ DocIterator::ptr PostingsReaderImpl<FormatTraits>::Iterator(
     return IteratorImpl(
       field_features, required_features,
       [&]<typename IteratorTraits, typename FieldTraits> -> DocIterator::ptr {
-        if (options.has_wand) {
+        return ResolveBool(options.has_wand, [&]<bool HasWand> -> DocIterator::ptr {
           if (_doc_in->GetType() == DataInput::Type::BytesViewInput) {
             auto it = memory::make_managed<PostingIteratorImpl<
-              IteratorTraits, FieldTraits, true, BytesViewInput>>();
+              IteratorTraits, FieldTraits, HasWand, BytesViewInput>>();
             it->Prepare(cookie, _doc_in.get(), _pos_in.get(), _pay_in.get());
             return it;
           } else {
             auto it = memory::make_managed<PostingIteratorImpl<
-              IteratorTraits, FieldTraits, true, IndexInput>>();
+              IteratorTraits, FieldTraits, HasWand, IndexInput>>();
             it->Prepare(cookie, _doc_in.get(), _pos_in.get(), _pay_in.get());
             return it;
           }
-        } else {
-          if (_doc_in->GetType() == DataInput::Type::BytesViewInput) {
-            auto it = memory::make_managed<PostingIteratorImpl<
-              IteratorTraits, FieldTraits, false, BytesViewInput>>();
-            it->Prepare(cookie, _doc_in.get(), _pos_in.get(), _pay_in.get());
-            return it;
-          } else {
-            auto it = memory::make_managed<PostingIteratorImpl<
-              IteratorTraits, FieldTraits, false, IndexInput>>();
-            it->Prepare(cookie, _doc_in.get(), _pos_in.get(), _pay_in.get());
-            return it;
-          }
-        }
-      });
+        });
+      }
+    );
   };
 
   if (metas.size() == 1) {
