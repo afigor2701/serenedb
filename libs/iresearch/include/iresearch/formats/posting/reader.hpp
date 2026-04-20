@@ -50,24 +50,6 @@ inline void PrepareInput(std::string& str, IndexInput::ptr& in, IOAdvice advice,
 
 inline constexpr IndexFeatures kPos = IndexFeatures::Freq | IndexFeatures::Pos;
 
-// template<uint8_t Value>
-// struct Extent {
-//   IRS_FORCE_INLINE static constexpr uint8_t GetExtent() noexcept {
-//     return Value;
-//   }
-// };
-
-// template<>
-// struct Extent<WandContext::kDisable> {
-//   Extent(uint8_t value) noexcept : value{value} {}
-
-//   IRS_FORCE_INLINE constexpr uint8_t GetExtent() const noexcept {
-//     return value;
-//   }
-
-//   uint8_t value;
-// };
-
 template<typename PostingImpl>
 struct WandPostingAdapter : PostingAdapter<PostingImpl> {
   using PostingAdapter<PostingImpl>::PostingAdapter;
