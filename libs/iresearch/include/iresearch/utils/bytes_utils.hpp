@@ -64,19 +64,19 @@ struct bytes_io<T, sizeof(uint16_t)> {
     return out;
   }
 
+  static T ReadBE(const byte_type*& in) {
+    const T out = absl::big_endian::Load16(in);
+    in += sizeof(T);
+
+    return out;
+  }
+
   template<typename InputIterator>
   static T ReadLE(InputIterator& in, std::input_iterator_tag) {
     T out = static_cast<T>(*in);
     ++in;
     out |= static_cast<T>(*in) << 8;
     ++in;
-
-    return out;
-  }
-
-  static T ReadBE(const byte_type*& in) {
-    const T out = absl::big_endian::Load16(in);
-    in += sizeof(T);
 
     return out;
   }
