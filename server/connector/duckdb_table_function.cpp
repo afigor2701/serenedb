@@ -487,53 +487,15 @@ void SearchScan::AppendSummary(
   if (!filter_summary.empty()) {
     out.insert("Filter", filter_summary);
   }
-  switch (scorer.kind) {
-    case SearchScan::ScorerKind::Bm25:
-      out.insert("Score", absl::StrCat("bm25(k1=", scorer.bm25.k1,
-                                       ", b=", scorer.bm25.b, ")"));
-      break;
-    case SearchScan::ScorerKind::Tfidf:
-      out.insert("Score",
-                 absl::StrCat("tfidf(with_norms=",
-                              scorer.tfidf.with_norms ? "true" : "false", ")"));
-      break;
-    case SearchScan::ScorerKind::RawTf:
-      out.insert("Score", "raw_tf()");
-      break;
-    case SearchScan::ScorerKind::LmJm:
-      out.insert("Score",
-                 absl::StrCat("lm_jm(lambda=", scorer.lm_jm.lambda, ")"));
-      break;
-    case SearchScan::ScorerKind::LmDirichlet:
-      out.insert("Score",
-                 absl::StrCat("lm_dirichlet(mu=", scorer.lm_dirichlet.mu, ")"));
-      break;
-    case SearchScan::ScorerKind::IndriDirichlet:
-      out.insert(
-        "Score",
-        absl::StrCat("indri_dirichlet(mu=", scorer.indri_dirichlet.mu, ")"));
-      break;
-    case SearchScan::ScorerKind::Dfi: {
-      const char* m = "standardized";
-      switch (scorer.dfi.measure) {
-        case SearchScan::DfiMeasure::Standardized:
-          m = "standardized";
-          break;
-        case SearchScan::DfiMeasure::Saturated:
-          m = "saturated";
-          break;
-        case SearchScan::DfiMeasure::ChiSquared:
-          m = "chi_squared";
-          break;
-      }
-      out.insert("Score", absl::StrCat("dfi(measure=", m, ")"));
-      break;
-    }
-    case SearchScan::ScorerKind::None:
-      break;
+  if (scorer) {
+    out.insert("Score", scorer->ToString());
   }
   if (score_top_k) {
-    out.insert("TopK", std::to_string(*score_top_k));
+    std::string topk_val = std::to_string(*score_top_k);
+    if (WandEnabled()) {
+      absl::StrAppend(&topk_val, ", optimized");
+    }
+    out.insert("TopK", std::move(topk_val));
   }
   if (EmitOffsets()) {
     auto cols =
