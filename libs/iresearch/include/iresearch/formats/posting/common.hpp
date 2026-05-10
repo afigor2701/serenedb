@@ -86,9 +86,23 @@ uint32_t ReadByteSize124(uint32_t code, InputType& in) {
       return in.ReadByte();
     case 2:
       return static_cast<uint16_t>(in.ReadI16());
-      break;
     case 4:
       return in.ReadI32();
+    default:
+      SDB_UNREACHABLE();
+  }
+}
+
+inline uint32_t ReadByteSize124FromBytes(uint32_t code, const byte_type*& in) {
+  switch (code) {
+    case 1:
+      return read<uint8_t>(in);
+    case 2:
+      return read<uint16_t>(in);
+    case 4:
+      return read<uint32_t>(in);
+    default:
+      SDB_UNREACHABLE();
   }
 }
 
@@ -184,6 +198,21 @@ uint64_t ReadByteSize1248ForSkipEntry(uint32_t code, InputType& in) {
       return static_cast<uint32_t>(in.ReadI32());
     case 3:
       return in.ReadI64();
+    default:
+      SDB_UNREACHABLE();
+  }
+}
+
+inline uint64_t ReadByteSize1248ForSkipEntryFromBytes(uint32_t code, const byte_type*& in) {
+  switch (code) {
+    case 0:
+      return read<uint8_t>(in);
+    case 1:
+      return read<uint16_t>(in);
+    case 2:
+      return read<uint32_t>(in);
+    case 3:
+      return read<uint64_t>(in);
     default:
       SDB_UNREACHABLE();
   }
