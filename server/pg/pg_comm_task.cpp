@@ -37,9 +37,11 @@
 #include <duckdb/parser/parsed_data/create_info.hpp>
 #include <duckdb/parser/parsed_data/drop_info.hpp>
 #include <duckdb/parser/parsed_data/transaction_info.hpp>
+#include <duckdb/parser/query_node/delete_query_node.hpp>
 #include <duckdb/parser/sql_statement.hpp>
 #include <duckdb/parser/statement/alter_statement.hpp>
 #include <duckdb/parser/statement/create_statement.hpp>
+#include <duckdb/parser/statement/delete_statement.hpp>
 #include <duckdb/parser/statement/drop_statement.hpp>
 #include <duckdb/parser/statement/execute_statement.hpp>
 #include <duckdb/parser/statement/transaction_statement.hpp>
@@ -766,7 +768,7 @@ void PgSQLCommTaskBase::ExecuteNextSimpleStatement() {
       return;
     }
     auto& next = stmt.extracted[stmt.current_stmt_idx];
-    stmt.prepared = _duckdb_conn->Prepare(next->query);
+    stmt.prepared = _duckdb_conn->Prepare(std::move(next));
     if (stmt.prepared->HasError()) {
       SendError(stmt.prepared->GetErrorObject());
       return;
@@ -1366,6 +1368,9 @@ CommandTag BuildCommandTag(const duckdb::PreparedStatement& prepared) {
     case StatementType::UPDATE_STATEMENT:
       return make("UPDATE");
     case StatementType::DELETE_STATEMENT:
+      if (unbound->Cast<duckdb::DeleteStatement>().node->is_truncate) {
+        return make("TRUNCATE TABLE");
+      }
       return make("DELETE");
     case StatementType::COPY_STATEMENT:
       return make("COPY");
