@@ -367,17 +367,6 @@ void SingleWandIterator<IteratorTraits, Root, Pos, Offs, InputType>::Collect(
     SDB_ASSERT(_left_in_leaf == 0);
     while (_left_in_list != 0) {
       auto last_doc = *(std::end(_docs) - 1);
-      /*
-        TODO(afigor2701): should we just read next block??
-      */
-      // if (last_doc + 1 > _skip.Reader().UpperBound()) {
-      //   _left_in_list = _skip.Seek(last_doc + 1);
-      //   auto& state = _skip.Reader().State();
-      //   if (state.doc_ptr) [[likely]] {
-      //     GetDocIn().Seek(state.doc_ptr);
-      //   }
-      //   last_doc = state.doc;
-      // }
       ReadBlock(last_doc);
       if (_left_in_leaf == kPostingBlock) {
         process_block.template operator()<kPostingBlock>(kPostingBlock);

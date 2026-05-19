@@ -660,13 +660,6 @@ void PostingsWriterImpl<FormatTraits>::EndDocument(size_t processed_docs) {
       if (HasValidWandWriter()) {
         NewSkipWriter::WriteWandData(_valid_writer->CalculateAndGetWandData(1), out);
       }
-
-      // ApplyToWriter([&](auto& writer) {
-      //   const uint8_t size = writer.Size(1);
-      //   SDB_ASSERT(size <= WandWriter::kMaxSize);
-      //   out.WriteByte(size);
-      // });
-      // ApplyToWriter([&](auto& writer) { writer.Write(1, out); });
     });
 
     _doc.block_last = _doc.last;

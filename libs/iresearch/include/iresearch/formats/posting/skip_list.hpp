@@ -644,38 +644,16 @@ class NewSkipReader {
                                    uint32_t* out_doc, uint32_t* out_freq,
                                    uint32_t prev) {
     SDB_ASSERT(_left_docs >= NewSkipWriter::kLevel0Size);
-    //SDB_ASSERT(prev == _entries[0].max_doc_delta);
     SDB_ASSERT(!IteratorTraits::Frequency());
-
-    // auto skip_zone = ReadInlineSkipZone(in);
-
-    // auto& entry = _entries[0];
 
     auto encoding = in.ReadByte();
     in.Skip(SkipSkipZone(encoding));
-
-    // uint32_t max_doc_delta_size = (encoding & 3) + 1;
-    // uint32_t wand_freq_code = (encoding >> 2) & 3;
-    // uint32_t wand_norm_code = (encoding >> 4) & 3;
-
-    // entry.max_doc_delta += ReadByteSize124(max_doc_delta_size, in);
-    // uint32_t wand_block_size = 0;
-    // if constexpr (HasWand) {
-    //   wand_block_size += ByteSize124ForSkipEntryByCode(wand_freq_code);
-    //   wand_block_size += ByteSize124ForSkipEntryByCode(wand_norm_code);
-    //   in.Skip(wand_block_size);
-    // }
+  
     uint32_t rest_block_size = static_cast<uint16_t>(in.ReadI16());
-
-    // auto& entry = _entries[0];
-    // entry.max_doc_delta += skip_zone.max_doc_delta;
 
     auto decode_zone_position = in.Position();
     auto res = IteratorTraits::ReadTailForFill(doc_limits::kBlockSize, in, buf,
                                                out_doc, prev);
-    // auto res = ReadDecodeZoneForFillBlock(in, buf, out_doc, out_freq, prev);
-
-    // ReadPosPayZone(skip_zone, decode_zone_position, in);
 
     in.Skip(rest_block_size - (in.Position() - decode_zone_position));
 
@@ -842,7 +820,6 @@ class NewSkipReader {
       if constexpr (HasWand) {
         Reader().SetWandScore(1, ReadWandRootImpl(*_level1_in));
       }
-      // Reader().ReadWand(1, *_level1_in);
 
       SDB_ASSERT(_level1_entries_count > _left_entries_level1);
       _left_docs =

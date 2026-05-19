@@ -280,25 +280,6 @@ size_t PostingsReaderImpl<FormatTraits>::BitUnion(
   const IndexFeatures field_features, const term_provider_f& provider,
   size_t* set, bool has_wand) {
   constexpr auto kBits{BitsRequired<std::remove_pointer_t<decltype(set)>>()};
-  //   uint32_t enc_buf[doc_limits::kBlockSize];
-  //   doc_id_t docs[doc_limits::kBlockSize
-  // #ifdef __AVX2__
-  //                 + 8  // placeholder for bitset materialize
-  // #endif
-  //   ];
-  //   const bool has_freq =
-  //     IndexFeatures::None != (field_features & IndexFeatures::Freq);
-
-  //   SDB_ASSERT(_doc_in);
-  //   auto doc_in = _doc_in->Reopen();
-
-  //   if (!doc_in) {
-  //     // implementation returned wrong pointer
-  //     SDB_ERROR("xxxxx", sdb::Logger::IRESEARCH,
-  //               "Failed to reopen document input");
-
-  //     throw IoError("failed to reopen document input");
-  //   }
 
   size_t count = 0;
   while (const TermMeta* meta = provider()) {
@@ -318,34 +299,6 @@ size_t PostingsReaderImpl<FormatTraits>::BitUnion(
       SetBit(set[doc / kBits], doc % kBits);
       ++count;
     }
-
-    // if (term_state.docs_count > 1) {
-    //   doc_in->Seek(term_state.doc_start);
-    //   SDB_ASSERT(!doc_in->IsEOF());
-    //   if (term_state.docs_count < doc_limits::kBlockSize) {
-    //     CommonSkipWandData(has_wand, *doc_in);
-    //   }
-    //   SDB_ASSERT(!doc_in->IsEOF());
-
-    //   if (has_freq) {
-    //     using FieldTraits = IteratorTraits<true, false, false>;
-    //     BitUnionImpl<FieldTraits>(*doc_in, term_state.docs_count, docs,
-    //     enc_buf,
-    //                               set);
-    //   } else {
-    //     using FieldTraits = IteratorTraits<false, false, false>;
-    //     BitUnionImpl<FieldTraits>(*doc_in, term_state.docs_count, docs,
-    //     enc_buf,
-    //                               set);
-    //   }
-
-    //   count += term_state.docs_count;
-    // } else {
-    //   const doc_id_t doc = doc_limits::min() + term_state.e_single_doc;
-    //   SetBit(set[doc / kBits], doc % kBits);
-
-    //   ++count;
-    // }
   }
 
   return count;
