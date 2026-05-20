@@ -264,7 +264,7 @@ struct FormatTraits128 {
     uint32_t max = in[0];
     uint32_t min = in[0];
     uint32_t min_byte_size = 0;
-    std::array<uint8_t, sizeof(uint32_t) + 1> hist{};
+    std::array<uint8_t, 33> hist; hist.fill(0);
     int32_t max_bit_size = 0;
     uint32_t patched_bit_required = 0;
     uint32_t exception_count = 0;
@@ -536,7 +536,7 @@ struct FormatTraits128 {
         for (size_t i = 0; i < doc_limits::kBlockSize; ++i) {
           if (in[i] > patched_mask) {
             exceptions[2 * exp_i] = i;
-            exceptions[2 * exp_i + 1] = in[i] >> patched_mask;
+            exceptions[2 * exp_i + 1] = in[i] >> patched_bit_required;
             ++exp_i;
             in[i] = in[i] & patched_mask;
           }
@@ -811,7 +811,7 @@ struct FormatTraits128 {
 
       case e_pfor: {
         uint8_t control = in.ReadByte();
-        const auto exception_count = control >> 5;
+        const uint32_t exception_count = control >> 5;
         const uint32_t bits = control & 31;
         const auto for_size = FromBits<byte_type>(doc_limits::kBlockSize * bits);
         const auto* data = ReadDataImpl(for_size + exception_count * 2, in, buf);
@@ -820,7 +820,7 @@ struct FormatTraits128 {
         data += for_size;
 
         for (size_t i = 0; i < exception_count; ++i) {
-          auto curr_idx = *data;
+          uint32_t curr_idx = *data;
           ++data;
           uint32_t value = *data;
           out[curr_idx] |= value << bits;
@@ -1382,7 +1382,7 @@ struct FormatTraits128 {
                (doc_limits::kBlockSize / BitsRequired<byte_type>());
       
       case e_pfor: {
-        auto control = in.ReadByte();
+        uint32_t control = in.ReadByte();
         return FromBits<byte_type>(doc_limits::kBlockSize * (control & 31)) + (control >> 5) * 2;
       }
 
