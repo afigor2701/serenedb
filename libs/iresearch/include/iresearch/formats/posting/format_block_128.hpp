@@ -529,7 +529,6 @@ struct FormatTraits128 {
       } break;
 
       case e_pfor: {
-        std::cout << "e_pfor " << len << " " << exception_count << std::endl;
         SDB_ASSERT(len == doc_limits::kBlockSize);
         SDB_ASSERT(exception_count != 0);
         uint32_t patched_mask = (1 << patched_bit_required) - 1;
