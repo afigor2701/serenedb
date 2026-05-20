@@ -281,6 +281,7 @@ struct FormatTraits128 {
         min = std::min(min, value);
 
         auto curr_bit_width = std::bit_width(value);
+        curr_bit_width += (curr_bit_width == 0);
         ++hist[curr_bit_width];
         max_bit_size = std::max(max_bit_size, curr_bit_width);
 
@@ -528,6 +529,7 @@ struct FormatTraits128 {
       } break;
 
       case e_pfor: {
+        std::cout << "e_pfor " << len << " " << exception_count << std::endl;
         SDB_ASSERT(len == doc_limits::kBlockSize);
         SDB_ASSERT(exception_count != 0);
         uint32_t patched_mask = (1 << patched_bit_required) - 1;
